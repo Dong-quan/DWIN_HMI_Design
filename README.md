@@ -1,117 +1,120 @@
-﻿# DWIN-HMI-Design
+# DWIN HMI for Smart Greenhouse Monitoring and Control
 
-HMI firmware for a **DWIN DMG80480C070** (7", 800 × 480) touch display. It shows battery, air and soil data with trend curves, and controls the pump, two valves, light, buzzer, curtain and fan. The UI supports **Vietnamese and English**, a real-time clock, **AUTO / MAN** mode and a screen lock in AUTO mode.
-
-The display talks to a host MCU over UART using the DWIN T5L command protocol. All data is exchanged through **VP (Variable Pointer) addresses**, listed in [VP Address Map](#vp-address-map).
+[![Display](https://img.shields.io/badge/Display-DWIN%20DMG80480C070-0b6e4f)](https://www.dwin-global.com/)
+[![Resolution](https://img.shields.io/badge/Resolution-800%C3%97480-blue)]()
+[![Language](https://img.shields.io/badge/Language-VI%20%7C%20EN-orange)]()
+[![Design](https://img.shields.io/badge/UI-Figma-a259ff)](https://www.figma.com/)
+[![Revision](https://img.shields.io/badge/revision-V1.0-green)]()
 
 ---
 
 ## Table of Contents
 
-1. [Features](#features)
-2. [Tools and Hardware](#tools-and-hardware)
-3. [Screenshots](#screenshots)
-4. [Project Structure](#project-structure)
-5. [Design Workflow](#design-workflow)
-6. [Page Map](#page-map)
-7. [VP Address Map](#vp-address-map)
-8. [Serial Protocol](#serial-protocol)
-9. [Language Switching](#language-switching)
-10. [AUTO / MAN Mode and Screen Lock](#auto--man-mode-and-screen-lock)
-11. [Password Keypad](#password-keypad)
-12. [Build and Load to the Display](#build-and-load-to-the-display)
-13. [Programming Notes and Pitfalls](#programming-notes-and-pitfalls)
+1. [Overview](#overview)
+2. [Design Requirements](#design-requirements)
+3. [Hardware Design](#hardware-design)
+   - [System Architecture](#system-architecture)
+   - [UI Design and Screenshots](#ui-design-and-screenshots)
+   - [VP Address Map](#vp-address-map)
+   - [Serial Protocol](#serial-protocol)
+   - [Language, Mode and Password Control](#language-mode-and-password-control)
+4. [Repository Structure](#repository-structure)
+5. [Getting Started](#getting-started)
+6. [References and Credits](#references-and-credits)
+7. [Author](#author)
 
 ---
 
-## Features
+## Overview
 
-| Group | Items |
+Greenhouse farming depends on keeping air and soil conditions within a narrow range and reacting quickly when they drift. This project is a **7-inch touchscreen HMI** built on a **DWIN DMG80480C070** display. It gives the operator a local panel to monitor the environment and run the equipment without a phone or a laptop.
+
+The screen does not read sensors itself. It talks to a host MCU over UART using **VP (Variable Pointer) addresses**, so it can be reused with any controller that follows the address map in this repository.
+
+Main functions:
+
+- **Monitor** battery level, air temperature and humidity (min, max, average), and seven soil parameters: temperature, moisture, N, P, K, EC and pH.
+- **Track trends** on eight real-time curves.
+- **Control** the pump, two valves, light, buzzer, fan and curtain.
+- **Switch AUTO / MAN** mode. In AUTO the MCU runs the outputs and the control screen is locked.
+- **Work in two languages** (Vietnamese and English) with a real-time clock (hour, minute, day, month, year).
+
+---
+
+## Design Requirements
+
+The requirements were defined first, then used to build the pages and the VP map.
+
+### Summary
+
+| Item | Target |
 | --- | --- |
-| Status | Battery level, 4G signal icon, date and time (hour, minute, day, month, year) |
-| Air | Temperature and humidity, each with min, max and average |
-| Soil (7 parameters) | Temperature, moisture, N, P, K, EC, pH (moisture also has an average) |
-| Charts | 8 curve channels: air temperature, air humidity, soil temperature, soil moisture, battery, pH, EC, N |
-| Control | Pump, valve 1, valve 2, light, buzzer, fan, curtain (stop / close / open) |
-| Mode | AUTO / MAN, with the screen locked in AUTO |
-| Language | Vietnamese and English |
-| Security | Password keypad (change password, confirm, notifications) |
+| Display | DWIN DMG80480C070, 7", 800 × 480 |
+| Interface | UART to host MCU, DWIN T5L protocol |
+| Languages | Vietnamese, English |
+| Operating modes | MAN, AUTO (screen locked in AUTO) |
+| UI design tool | Figma |
+| Configuration tool | DWIN DGUS II tool (`DWprj.hmi`) |
+
+### Functional requirements
+
+**Monitoring**
+- Battery level and 4G signal icon
+- Air temperature and humidity, each with min, max and average
+- Soil temperature, moisture, N, P, K, EC and pH
+- Date and time (hour, minute, day, month, year)
+
+**Charts**
+- Eight curve channels: air temperature, air humidity, soil temperature, soil moisture, battery, pH, EC, N
+
+**Control**
+- Pump, valve 1, valve 2, light, buzzer, fan
+- Curtain with three states: stop, close, open
+
+**System**
+- Vietnamese and English page sets with identical layout
+- AUTO / MAN selection, with the control screen locked in AUTO
+- Password keypad (change password, confirm, notifications)
 
 ---
 
-## Tools and Hardware
+## Hardware Design
+
+### System Architecture
+
 
 | Item | Detail |
 | --- | --- |
 | Display | DWIN DMG80480C070 (7", 800 × 480) |
-| UI design | Figma (exported to images) |
-| HMI configuration | DWIN DGUS / DGUS II tool, opens `DWprj.hmi` |
-| Config file | `T5LCFG` inside `DWIN_SET` (UART, RTC, touch and other settings) |
-| Host | MCU connected over UART (not covered here) |
+| UI design | Figma, exported as images |
+| Configuration | DWIN DGUS II tool, opens `DWprj.hmi` |
+| Config file | `DWIN_SET/T5LCFG` (UART, RTC, touch and other settings) |
+| Host | MCU connected over UART |
 
----
+### UI Design and Screenshots
 
-## Screenshots
+Every page is drawn in Figma at 800 × 480. One set is made for Vietnamese and one for English with identical layouts, exported to `53Viet` and `32Anh`, then imported as page backgrounds in `DWprj.hmi`. Data variables, text, curves, touch keys and icons are placed on top and linked to VP addresses.
 
-Four functional screens, shown in both languages.
-
-| Screen 1 – Monitoring | Screen 2 – Soil data |
+| Screen 1 – Home | Screen 2 – Language |
 | :---: | :---: |
-| ![Screen 1](Images/hmi_screen1.png) | ![Screen 2](Images/hmi_screen2.png) |
-| **Screen 3 – Charts** | **Screen 4 – Control** |
-| ![Screen 3](Images/hmi_screen3.png) | ![Screen 4](Images/hmi_screen4.png) |
+| ![Screen 1](Images/home.png) | ![Screen 2](Images/ngonngu.png) |
+| **Screen 3 – Data** | **Screen 4 – Control** |
+| ![Screen 3](Images/thongso.png) | ![Screen 4](Images/dieukhien.png) |
 
-<!-- TODO: replace the image paths above with your real screenshots. Rename the
-     captions if your screens have different functions. -->
 
----
-
-## Project Structure
-
-```
-HMI/
-├── 32Anh/            # Page images, English
-├── 53Viet/           # Page images, Vietnamese
-├── ICON/             # Icon library (battery, 4G, buttons, lock...)
-├── image/            # Source images exported from Figma
-├── TFT/              # TFT resources
-├── DWIN_SET/         # Auto-generated by the tool; copy this folder to the SD card
-│   └── T5LCFG        # Display configuration (editable)
-├── DWprj.hmi         # Project file, open in the DWIN tool to edit
-├── DWprj.tft         # Compiled project
-└── 0_VPcode.txt      # VP address list used by the MCU firmware
-```
-
-> `DWIN_SET` is generated by the tool. Edit the project in `DWprj.hmi` and regenerate it, except for `T5LCFG`, which is meant to be edited.
-
----
-
-## Design Workflow
-
-1. **Draw** every page in Figma at 800 × 480. Make one set for Vietnamese and one for English with identical layouts.
-2. **Export** as images into `32Anh` (English) and `53Viet` (Vietnamese). Keep names and page order consistent.
-3. **Import** the images as page backgrounds in `DWprj.hmi`, then place the controls (data variables, text, curves, touch keys, icons) on each page.
-4. **Assign VP addresses** from [VP Address Map](#vp-address-map). Use the same address on the Vietnamese and English pages.
-5. **Generate** `DWIN_SET`, edit `T5LCFG` if needed, and [load it to the display](#build-and-load-to-the-display).
-
----
-
-## Page Map
+**Page map**
 
 | Page ID | Page |
 | --- | --- |
 | `0x0077` (119) | Control page, Vietnamese |
 | `0x0083` (131) | Control page, English |
 
-<!-- TODO: add the remaining pages (monitoring, soil, charts, password). -->
 
----
-
-## VP Address Map
+### VP Address Map
 
 All addresses are **hexadecimal**. `ON = 0x0001`, `OFF = 0x0000`.
 
-### Control
+**Control**
 
 | Function | VP | Values |
 | --- | --- | --- |
@@ -124,7 +127,7 @@ All addresses are **hexadecimal**. `ON = 0x0001`, `OFF = 0x0000`.
 | Curtain | `5066` | 0001 stop / 0002 close / 0003 open |
 | AUTO / MAN | `7200` | 0000 MAN / 0001 AUTO |
 
-### Sensor data
+**Sensor data**
 
 | Parameter | VP | Parameter | VP |
 | --- | --- | --- | --- |
@@ -138,9 +141,9 @@ All addresses are **hexadecimal**. `ON = 0x0001`, `OFF = 0x0000`.
 | Air humidity average | `5178` | Soil moisture average | `5248` |
 | Battery | `5182` | | |
 
-Addresses are spaced by 4 so that each value has room for its text length. Remember that one text length unit holds 2 characters.
+Addresses are spaced by 4. One text length unit holds 2 characters.
 
-### Status icons, time and scrolling text
+**Status, time and scrolling text**
 
 | Function | VP |
 | --- | --- |
@@ -149,20 +152,20 @@ Addresses are spaced by 4 so that each value has room for its text length. Remem
 | 4G icon | `7400` |
 | Scrolling text | `5000`, `7800`, `7900` |
 
-The time-setting field uses a set of controls: a basic touch module and a variable icon (0x45), a variable icon with icon page transition and sliding icon selection (0x46), and a return key code at `1000`.
+The time-setting field combines a basic touch module with a variable icon, a variable icon with icon page transition and sliding icon selection, and a return key code at `1000`.
 
-### Curve channels
+**Curve channels**
 
-| Channel | Data |
-| --- | --- |
-| 0 | Air temperature |
-| 1 | Air humidity |
-| 2 | Soil temperature |
-| 3 | Soil moisture |
-| 4 | Battery |
-| 5 | pH |
-| 6 | EC |
-| 7 | N |
+| Channel | Data | Clear command |
+| --- | --- | --- |
+| 0 | Air temperature | `5A A5 05 82 03 01 00 00` |
+| 1 | Air humidity | `5A A5 05 82 03 03 00 00` |
+| 2 | Soil temperature | `5A A5 05 82 03 05 00 00` |
+| 3 | Soil moisture | `5A A5 05 82 03 07 00 00` |
+| 4 | Battery | `5A A5 05 82 03 09 00 00` |
+| 5 | pH | `5A A5 05 82 03 0B 00 00` |
+| 6 | EC | `5A A5 05 82 03 0D 00 00` |
+| 7 | N | `5A A5 05 82 03 0F 00 00` |
 
 Curve axis labels use text variables spaced by `0x10`:
 
@@ -175,84 +178,46 @@ Curve axis labels use text variables spaced by `0x10`:
 
 Curve controls start from `0x5000`.
 
----
+### Serial Protocol
 
-## Serial Protocol
-
-Every frame starts with the header `5A A5`, followed by the length, the command and the data.
+Every frame starts with the header `5A A5`, followed by the length, the command and the data. `<len>` counts every byte after it.
 
 | Command | Code | Frame format |
 | --- | --- | --- |
 | Write VP | `82` | `5A A5 <len> 82 <VP hi> <VP lo> <data...>` |
 | Read VP | `83` | `5A A5 <len> 83 <VP hi> <VP lo> <word count>` |
 
-`<len>` counts every byte after it.
-
-### Examples
-
 | Action | Frame |
 | --- | --- |
 | Fan off (VP `5061`) | `5A A5 05 82 50 61 00 00` |
 | Fan on (VP `5061`) | `5A A5 05 82 50 61 00 01` |
-| Clear curve channel 0 | `5A A5 05 82 03 01 00 00` |
-| Clear curve channel 1 | `5A A5 05 82 03 03 00 00` |
-| Clear curve channel 2 | `5A A5 05 82 03 05 00 00` |
-| Clear curve channel 3 | `5A A5 05 82 03 07 00 00` |
-| Clear curve channel 4 | `5A A5 05 82 03 09 00 00` |
-| Clear curve channel 5 | `5A A5 05 82 03 0B 00 00` |
-| Clear curve channel 6 | `5A A5 05 82 03 0D 00 00` |
-| Clear curve channel 7 | `5A A5 05 82 03 0F 00 00` |
 | Ask current page | `5A A5 04 83 00 14 01` |
+| Current page reply | `5A A5 06 83 00 14 01 <page ID>` |
 
-The current-page reply is `5A A5 06 83 00 14 01 <page ID>`.
+The return key code only reports touch events when **Data auto-uploading** is enabled. Turn it on for every control that the MCU must receive.
 
-The return-key-code function only reports the touch event when **Data auto-uploading** is enabled, so turn it on for every control that the MCU must receive.
+### Language, Mode and Password Control
 
----
-
-## Language Switching
-
-Language is changed by jumping between two identical page sets. The page jump is a write to register `0x0084`:
+**Language switching.** Each language has its own page set. A page jump is a write to register `0x0084`:
 
 | Target | Frame |
 | --- | --- |
 | Vietnamese control page (`0x0077`) | `5A A5 07 82 00 84 5A 01 00 77` |
 | English control page (`0x0083`) | `5A A5 07 82 00 84 5A 01 00 83` |
 
-Because each language has its own page set, the MCU should:
+The MCU should ask the current page to know which language is active, use the same VP addresses on both sets, and re-send the current values after every switch.
 
-1. Ask the current page (`5A A5 04 83 00 14 01`) so it knows which language is active.
-2. Use the same VP addresses on both sets, so data keeps showing after a switch.
-3. Re-send the current values after every language change.
-
----
-
-## AUTO / MAN Mode and Screen Lock
+**AUTO / MAN and screen lock.**
 
 | Mode | VP `7200` | Behavior |
 | --- | --- | --- |
-| MAN | `0000` | All control keys are active. The user operates the pump, valves, light, buzzer, curtain and fan by hand. |
+| MAN | `0000` | All control keys are active. |
 | AUTO | `0001` | The MCU controls the outputs. The control screen is locked. |
 
-Suggested implementation of the lock:
+In AUTO, a transparent lock layer (variable icon driven by VP `7200`) covers the control area, and the MCU ignores key codes for `5060`–`5066` and writes the real output state back so the display never shows a stale state.
 
-- Place a transparent lock layer (a variable icon driven by VP `7200`) over the control area. It appears only when the value is `0001`.
-- On the MCU side, ignore any key code for `5060`–`5066` while in AUTO, and write the actual output state back to those VPs so the display never shows a stale state.
-- Mode can still be changed by the user, or by a password if you want to restrict it (see below).
 
-<!-- TODO: confirm which lock method you actually used (overlay, touch disable, or MCU-side only). -->
-
----
-
-## Password Keypad
-
-The numeric keypad uses basic touch module key codes:
-
-| Key | Code |
-| --- | --- |
-| 0 – 9 | `30` – `39` |
-| Delete | `40` |
-| OK | `41` |
+**Password keypad.** Key codes: `0`–`9` = `30`–`39`, Delete = `40`, OK = `41`.
 
 | Field | Vietnamese VP | English VP |
 | --- | --- | --- |
@@ -265,27 +230,57 @@ The numeric keypad uses basic touch module key codes:
 
 ---
 
-## Build and Load to the Display
+## Repository Structure
 
-1. Open `DWprj.hmi` in the DWIN tool and check that every page and VP is correct.
+```
+HMI/
+├── 32Anh/                  # Page images, English
+├── 53Viet/                 # Page images, Vietnamese
+├── ICON/                   # Icon library
+├── image/                  # Source images exported from Figma
+├── TFT/                    # TFT resources
+├── DWIN_SET/               # Auto-generated by the tool, copy to SD card
+│   └── T5LCFG              # Display configuration (editable)
+├── DWprj.hmi               # Project file, open in the DWIN tool
+├── DWprj.tft               # Compiled project
+├── 0_VPcode.txt            # VP address list used by the MCU firmware
+└── README.md
+```
+
+---
+
+## Getting Started
+
+1. Install the DWIN DGUS II tool and open `DWprj.hmi` to check the pages and VP addresses.
 2. Generate the project. The tool creates the `DWIN_SET` folder.
 3. Edit `DWIN_SET/T5LCFG` if you need to change the UART baud rate, RTC or touch settings.
 4. Copy `DWIN_SET` to the root of a FAT32 SD card.
 5. Power off the display, insert the card and power on. Wait for the download to finish, then remove the card and restart.
+6. Connect the display UART to the host MCU and send frames as described in [Serial Protocol](#serial-protocol).
 
-<!-- TODO: add your UART baud rate and the T5LCFG values you changed. -->
 
----
+**Notes and pitfalls**
 
-## Programming Notes and Pitfalls
-
-- Always keep track of **HEX vs DEC**. All VP addresses and data in this project are hexadecimal.
-- When you **copy a control**, check its **initial value**. It often defaults to `0` or to the Vietnamese text. Switching to the English page does not have this problem.
-- **Return Key Code** needs **Data auto-uploading** turned on, or the MCU receives nothing.
-- **One text length unit holds 2 characters**, so size the text field and the VP spacing accordingly.
-- The language button uses a basic touch module.
-- The incremental adjustment control lets you choose the press type: continuous press or one step per press.
-- Start curve controls from `0x5000`.
+- Keep track of **HEX vs DEC**. All VP addresses and data here are hexadecimal.
+- When you **copy a control**, check its **initial value**. It often defaults to `0` or to the Vietnamese text.
+- **Return Key Code** needs **Data auto-uploading**, or the MCU receives nothing.
+- **One text length unit holds 2 characters.**
+- The incremental adjustment control lets you choose continuous press or one step per press.
 - Use the same VP on the Vietnamese and English pages. Only the page and the images differ.
 
 ---
+
+## References and Credits
+
+- DWIN. *T5L DGUS II Application Development Guide*, V2.921. Protocol, VP and control reference used for this project.
+- DWIN. DMG80480C070 display, https://www.dwin-global.com/
+- Figma, https://www.figma.com/ (UI design)
+
+The page design, VP address map and MCU frames in this repository were created for this project.
+
+---
+
+## Author
+
+- **Huynh Vo Phuc Loc**
+- GitHub: [Dong-quan](https://github.com/Dong-quan)
