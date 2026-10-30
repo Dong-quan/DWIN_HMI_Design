@@ -1,0 +1,66 @@
+- Nhớ HEX, DEC, có biểu đồ thì bắt đầu từ 0x5000
+- Chú ý biến Initial value khi copy (thường mặc định là 0 hoặc chữ TQ, Chuyển English thì k bị)
+- Return Key Code nhớ bật Data auto-uploading
+- 1 text length chứa 2 word 
+- Ô ngôn ngữ: (basic toucn module)
+- Tất cả là HEX
+- Incremental adjustment có chọn cách nhấn, nhấn liên tục hoặc từ lần
+- Ô chạy chữ:               5000, 7800, 7900
+                        Tiếng Việt    Tiếng Anh
++ MK cũ:                    6000         6600
++ MK mới:                   6100         6700
++ XN:                       6200         6800
++ Thông báo MK:             6300         6900
++ Nhap MK:                  6400         7000
++ Thông báo MK:             6500         7100
+- Ô cài thời gian:          5040  (tr45: basic toucn module, var icon; tr46: var icon,Icon Page Tran, Sliding icon sel; tr1000: return key code)
+- Nút nhấn bơm:             5060
+- Nút nhấn quạt:            5061
+- Nút nhấn còi:             5062
+- Nút nhấn đèn:             5063
+- Nút nhấn van 1,2:         5064, 5065
+- Nút nhấn rèm:             5066 (STOP: 0001, CLOSE: 0002, OPPEN: 0003)
+//  + Dừng:                   5070 (0000            0001)
++ On:                       0001
++ Off:                      0000
+- Nhiệt độ:                 5150
+- Nhiệt độ min:             5154
+- Nhiệt độ max:             5158
+- Nhiệt độ ave:             5162
+- Độ ẩm:                    5166
+- Độ ẩm min:                5170
+- Độ ẩm max:                5174
+- Độ ẩm ave:                5178
+- Pin:                      5182
+//- Điện áp:                  5186
+- Nhiệt độ đất:             5216
+- Độ ẩm đất:                5224
+- N:                        5228
+- P:                        5232
+- K:                        5236
+- EC:                       5240
+- pH:                       5244
+- Độ ẩm đất ave:            5248
+//- Thời tiết                 7200
+- AUTO/MAN:                 7200 (MAN 0000, AUTO 0001)
+- Icon PIN                  7300
+- Icon 4G                   7400
+- Biểu đồ nhiệt độ channel 0, độ ẩm channel 1, độ đất 2, ẩm đất 3, pin 4, pH 5, EC 6, N 7
+- Text đồ thị nhiệt độ                        7500 7510 7520 ... 7590
+- Text đồ thị độ ẩm                           75A0 75B0 75C0 ... 7630  
+- Text đồ thị nhiệt độ, độ ẩm đất, pH, EC, N  7640 7650 7660 ... 76D0
+- Text đồ thị pin                             76E0 76F0 7700 ... 7770
+        
+- Xóa Channel 0:                              5A A5 05 82 0301 0000
+- Xóa Channel 1:                              5A A5 05 82 0303 0000
+- Xóa Channel 2:                              5A A5 05 82 0305 0000
+- Xóa Channel 3:                              5A A5 05 82 0307 0000
+- Xóa Channel 4:                              5A A5 05 82 0309 0000
+- Xóa Channel 5:                              5A A5 05 82 030B 0000
+- Xóa Channel 6:                              5A A5 05 82 030D 0000
+- Xóa Channel 7:                              5A A5 05 82 030F 0000
+- Lệnh chuyển trang điều khiển Tiếng Việt:    5A A5 07 82 00 84 5A 01 00 77
+- Lệnh chuyển trang điều khiển Tiếng Anh:     5A A5 07 82 00 84 5A 01 00 83
+- Lệnh hỏi trang đang ở:                      5A A5 04 83 00 14 01
+- Trả trang trở về:                           5A A5 06 83 00 14 01 [ID_Trang]
+- Chuỗi gửi lên trang:                        5A A5 05 82 50 61 00 00
